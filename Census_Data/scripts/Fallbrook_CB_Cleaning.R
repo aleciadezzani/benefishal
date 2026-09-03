@@ -16,4 +16,28 @@ library(sf) #we need to deal with shapefile data
 #Importing Fallbrook block list as a dataframe
 #raw data is directly from US Census Bureau, access here: https://www2.census.gov/geo/maps/DC2020/DC20BLK/st06_ca/place/p0623462_fallbrook/DC20BLK_P0623462_BLK2MS.txt
 #first use R to make a text file, and paste the data directly into it, called it "f_blocks_list_raw.txt" and saved it to raw_data folder
+f_blocks_raw <- read.table(here("Census_Data/raw_data", "f_blocks_list_raw.txt"), 
+                           header = TRUE, sep = ";")
+str(f_blocks_raw)
+
+#Cleaning the f_blocks data
+#start with removing irrelevant data, cut down to only fullcode, tract, block, place
+f_blocks <- f_blocks_raw |>
+  clean_names() |>
+  dplyr::select(fullcode, tract, block, place)
+  #last round I renamed fullcode to geoid, but we actually don't have to do that to get the join to work
+
+#Importing SD County census block data
+sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
+                                     "Census_Blocks_2020.shp"))
+str(sd_blocks_raw)
+str(f_blocks)
+
+#this SD county data doesn't have handy one to one geoid data like Riverside County, can I do a join
+#that keeps only the rows that meet both the tract and block values of my f_blocks dataset?
+
+
+
+
+
 
