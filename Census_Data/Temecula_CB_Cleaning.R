@@ -7,12 +7,17 @@
 #Clear the enviro
 rm(list=ls())
 
+#install packages
+install.packages("raster")
+
 #Load libraries
 library(here) #allows pointed file structure, essential for Mac to PC coding
 library(tidyverse) #essential for everything we're going to do
 library(janitor) #cleans things up, mainly names
+library(sf) #we need to deal with shapefile data
+library(raster) #we need to deal with metadata/attributes of raster/polygon data
 
-#Import the data
+#Importing the Temecula census blocks list data
 #raw data is directly from US Census Bureau, access here: https://www2.census.gov/geo/maps/DC2020/DC20BLK/st06_ca/place/p0678120_temecula/
 t_blocks_raw <- read.table(here("Census_Data/raw_data", "temecula_blocks.txt"), 
                             header = TRUE, sep = ";")
@@ -20,6 +25,27 @@ t_blocks_raw
 
 #Save the data
 write.csv(t_blocks_raw, here("Census_data/raw_data", "temecula_blocks_raw"))
+
+#Clean the data
+t_blocks <- t_blocks_raw |>
+  clean_names()
+t_blocks
+
+#Importing Riverside County Census Blocks data
+
+riverside_county_blocks <- st_read(here("Census_data/raw_data/Riverside_Census_Blocks_2020_", 
+                                        "Census_Blocks_2020_.shp"))
+riverside_county_blocks
+
+#Saving the data
+riverside_county_blocks
+
+
+
+
+
+
+
 
 
 
