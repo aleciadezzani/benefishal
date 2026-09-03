@@ -19,12 +19,9 @@ library(raster) #we need to deal with metadata/attributes of raster/polygon data
 
 #Importing the Temecula census blocks list data
 #raw data is directly from US Census Bureau, access here: https://www2.census.gov/geo/maps/DC2020/DC20BLK/st06_ca/place/p0678120_temecula/
-t_blocks_raw <- read.table(here("Census_Data/raw_data", "temecula_blocks.txt"), 
+t_blocks_raw <- read.table(here("Census_Data/raw_data", "t_blocks.txt"), 
                             header = TRUE, sep = ";")
 t_blocks_raw
-
-#Save the data
-write.csv(t_blocks_raw, here("Census_data/raw_data", "temecula_blocks_raw"))
 
 #Importing Riverside County Census Blocks data
 
