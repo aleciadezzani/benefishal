@@ -35,13 +35,17 @@ riverside_blocks_raw
 #Saving the data
 write.csv(riverside_blocks_raw, here("Census_data/raw_data", "riverside_blocks_raw"))
 
-#Now I need to make sure that my data frames match...
-
 #Clean the data
-#start with removing irrelevant data...
+#start with removing irrelevant data, cut down to only fullcode, tract, block, place
+#and rename fullcode to geoid to match riverside_blocks data
 t_blocks <- t_blocks_raw |>
-  clean_names()
+  clean_names() |>
+  dplyr::select(fullcode, tract, block, place) |>
+  rename(geoid=fullcode)
 t_blocks
+
+riverside_blocks <- riverside_blocks_raw |>
+  clean_names()
 
 
 ##The t_blocks data has the GEOID as "fullcode", and listed with a decimal point
