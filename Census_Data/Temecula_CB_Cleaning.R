@@ -50,18 +50,36 @@ t_blocks
 
 t_blocks$geoid <- gsub("\\.", "", t_blocks$geoid)
 
+str(t_blocks)
+#confirming that geoid, tract, block, and place are formats of variables
+#that match in riverside_blocks
+#currently, tract is a num in t_blocks and an integer in riverside_blocks
+#don't think this should be an issue but noting here just in case
 
-
+#Clean riverside_blocks data
+#I'm hesitant to remove any columns as idk what I'll need for mapping
 riverside_blocks <- riverside_blocks_raw |>
   clean_names()
+str(riverside_blocks)
 
+#Checking keys before joining
+#pretty sure geoid is the primary key in both datasets, but want to make sure
+t_blocks |>
+  count(geoid) |>
+  filter(n >1)
+  #pulled zero rows where n>1, indicating it is a key
+t_blocks |>
+  filter(is.na(geoid))
+  #pulled zero rows with NA, indicating we don't have any rows missing a geoid
 
-##The t_blocks data has the GEOID as "fullcode", and listed with a decimal point
-##I want to figure out how to remove that decimal point so that 
-##I can match it to the GEOID column in my Riverside County full blocks dataset
+riverside_blocks |>
+  count(geoid) |>
+  filter(n > 1)
+  #pulled zero rows where n>1, indicating that it's a key
 
-
-
+riverside_blocks |>
+  filter(is.na(geoid))
+  #pulled zero, think this indicates we're not missing anything
 
 
 
