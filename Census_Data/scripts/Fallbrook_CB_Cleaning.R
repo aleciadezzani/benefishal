@@ -35,6 +35,19 @@ str(f_blocks)
 
 #this SD county data doesn't have handy one to one geoid data like Riverside County, can I do a join
 #that keeps only the rows that meet both the tract and block values of my f_blocks dataset?
+#seems like yes...
+
+#Filter joining the datasets
+
+fallbrook_blocks_geom <- sd_blocks_raw |>
+  semi_join(f_blocks, join_by(tract, block))
+
+str(fallbrook_blocks_geom)
+
+#saving our new fallbrook only census blocks data as a shape file
+
+st_write(fallbrook_blocks_geom, here("Census_Data/raw_data/", 
+                                    "fallbrook_blocks_geom.shp"))
 
 
 
