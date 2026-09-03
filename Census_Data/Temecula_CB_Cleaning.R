@@ -60,6 +60,8 @@ str(t_blocks)
 #I'm hesitant to remove any columns as idk what I'll need for mapping
 riverside_blocks <- riverside_blocks_raw |>
   clean_names()
+#removing the leading zero from the geoid so that join works aka geoids match between datasets
+riverside_blocks$geoid <- sub("^0+", "", riverside_blocks$geoid)
 str(riverside_blocks)
 
 #Checking keys before joining
@@ -80,6 +82,31 @@ riverside_blocks |>
 riverside_blocks |>
   filter(is.na(geoid))
   #pulled zero, think this indicates we're not missing anything
+
+#Now to use a filtering join (semi-join) to keep only the rows in riverside_blocks
+#that have a match in t_blocks
+#new data frame should be called temecula_blocks_geom, as it's all the blocks for Temecula
+#within the existing shapefile data!
+
+temecula_blocks_geom <- riverside_blocks |>
+  semi_join(t_blocks, join_by(geoid==geoid))
+  #this is giving me a data frame with no values, what's the issue?
+  #leading zeros! the riverside_blocks data has a leading zero in the geoid...
+  #need to go back in and use gsub again to cut that from the riverside_blocks dataset
+
+#saving our new temecula only census blocks data as a shape file
+
+st_write(temecula_blocks_geom, here("Census_Data/raw_data/", 
+                                    "temecula_blocks_geom.shp"))
+
+
+
+
+
+
+
+
+
 
 
 
