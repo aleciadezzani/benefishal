@@ -14,3 +14,5 @@ rm(list=ls())
 library(here) #allows pointed file structure, essential for Mac to PC coding
 library(tidyverse) #essential for everything we're going to do
 library(janitor) #cleans things up, mainly names
+
+#Another edit to try my Git use again!
