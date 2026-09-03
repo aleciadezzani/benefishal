@@ -98,20 +98,3 @@ temecula_blocks_geom <- riverside_blocks |>
 
 st_write(temecula_blocks_geom, here("Census_Data/raw_data/", 
                                     "temecula_blocks_geom.shp"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
