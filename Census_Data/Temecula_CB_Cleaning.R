@@ -19,3 +19,10 @@ t_blocks_raw <- read.table(here("Census_Data/raw_data", "temecula_blocks.txt"),
 t_blocks_raw
 
 #Save the data
+write.csv(t_blocks_raw, here("Census_data/raw_data", "temecula_blocks_raw"))
+
+
+
+
+
+
