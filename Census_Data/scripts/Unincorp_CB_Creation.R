@@ -100,7 +100,12 @@ unincorp_sd_blocks <- sd_blocks_raw |>
 #I don't think I can join the two different shapefiles together unfortunately
 #But I think I can zip the outputs together and then upload them into Arc in one version...
 
+#Saving new shapefiles for our unincorporated census blocks in Riverside and SD counties
 
+st_write(unincorp_sd_blocks, here("Census_Data/Unincorporated_Riverside_SD_2020_Census_Blocks/", 
+                                     "unincorp_sd_blocks.shp"))
+st_write(unincorp_riverside_blocks, here("Census_Data/Unincorporated_Riverside_SD_2020_Census_Blocks/", 
+                                         "unincorp_riverside_blocks.shp"))
 
 
 
