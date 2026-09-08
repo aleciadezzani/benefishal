@@ -62,18 +62,32 @@ riverside_blocks <- riverside_blocks |>
 m_blocks <- m_blocks_raw |>
   clean_names() |>
   dplyr::select(fullcode, tract, block,place)
-#also have to pull the decimal point out of the geoid values, as riverside_blocks has no decimal
+#also have to pull the decimal point out of the fullcode values, as riverside_blocks has no decimal
 m_blocks$fullcode <- gsub("\\.", "", m_blocks$fullcode)
 #do the same for tracts
 m_blocks$tract <- gsub("\\.", "", m_blocks$tract)
+#pulling block list for tract 49702 only
+m_blocks <- m_blocks |>
+  filter(tract == "49702")
 
 #Temecula blocks cleaning
 t_blocks <- t_blocks_raw |>
   clean_names() |>
   dplyr::select(fullcode, tract, block, place)
-
+#removing decimals from fullcode/geoid and tract values
 t_blocks$fullcode <- gsub("\\.", "", t_blocks$fullcode)
 t_blocks$tract <- gsub("\\.", "", t_blocks$tract)
+#filtering to just block list for tracts 512 and 43254
+t_blocks <- t_blocks |>
+  filter(tract %in% c("512", "43254"))
+#adding two trailing zeros to the 512 tract values to match riverside_blocks tract values
+t_blocks$tract <- gsub("^512$", "51200", t_blocks$tract)
+
+#Joining Temecula and Murrieta block lists into one set of incorporated blocks
+tm_blocks <- bind_rows(t_blocks, m_blocks)
+
+
+
 
 
 
