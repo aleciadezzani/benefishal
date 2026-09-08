@@ -43,6 +43,11 @@ sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapef
                               "Census_Blocks_2020.shp"))
 str(sd_blocks_raw)
 
+#adding Fallbrook block list
+f_blocks_raw <- read.table(here("Census_Data/raw_data", "f_blocks_list_raw.txt"), 
+                           header = TRUE, sep = ";")
+str(f_blocks_raw)
+
 #Filtering the data
   ##start with Riverside, then do SD, then combine the shapefiles into one?
 
@@ -100,10 +105,23 @@ unincorp_riverside_blocks <- riverside_blocks |>
 
 str(unincorp_riverside_blocks)
 
-#Now for SD County filtering
-unincorp_sd_blocks <- sd_blocks_raw |>
+#Now for SD County 
+#Cleaning Fallbrook list for just blocks in the 190.01 tract
+f_blocks <- f_blocks_raw |>
+  clean_names() |>
+  dplyr::select(fullcode, tract, block, place) |>
+  filter(tract == "190.01")
+
+#filtering for only sd county blocks in 190.01 tract
+sd_blocks <- sd_blocks_raw |>
   clean_names() |>
   filter(tract == "190.01")
+
+#joining the datasets together to get only the census blocks in 190.01 that are not
+#within the CDP of Fallbrook
+
+unincorp_sd_blocks <- sd_blocks |> 
+  anti_join(f_blocks, join_by(tract, block))
 
 #I don't think I can join the two different shapefiles together unfortunately
 #But I think I can zip the outputs together and then upload them into Arc in one version...
