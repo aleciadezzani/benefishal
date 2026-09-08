@@ -38,6 +38,19 @@ sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapef
                               "Census_Blocks_2020.shp"))
 str(sd_blocks_raw)
 
+#Filtering the data
+  ##start with Riverside, then do SD, then combine the shapefiles into one?
+#Riverside County
+  ##reference maps from Census Bureau indicate that tracts 512, 497.02, and 432.54
+  ##are only relevant tracts for us. filter for those first within the shapefile
+riverside_blocks <- riverside_blocks_raw |>
+  clean_names()
+#removing the leading zero from the geoid so that join works aka geoids match between datasets
+riverside_blocks$geoid <- sub("^0+", "", riverside_blocks$geoid)
+str(riverside_blocks)
+#filtering for just our relevant tracts
+riverside_blocks <- riverside_blocks |>
+  filter(tract %in% c("51200", "49702", "43254"))
 
 
 
