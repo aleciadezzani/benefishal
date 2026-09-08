@@ -86,9 +86,11 @@ t_blocks$tract <- gsub("^512$", "51200", t_blocks$tract)
 #Joining Temecula and Murrieta block lists into one set of incorporated blocks
 tm_blocks <- bind_rows(t_blocks, m_blocks)
 
+#Keeping Riverside blocks excluding those from tm_blocks 
+unincorp_riverside_blocks <- riverside_blocks |>
+  anti_join(tm_blocks, join_by(geoid == fullcode))
 
-
-
+str(unincorp_riverside_blocks)
 
 
 
