@@ -66,9 +66,11 @@ m_blocks <- m_blocks_raw |>
 m_blocks$fullcode <- gsub("\\.", "", m_blocks$fullcode)
 #do the same for tracts
 m_blocks$tract <- gsub("\\.", "", m_blocks$tract)
-#pulling block list for tract 49702 only
+#adding two trailing zeros to the 512 tract values to match riverside_blocks tract values
+m_blocks$tract <- gsub("^512$", "51200", m_blocks$tract)
+#pulling block list for tracts 49702 and 512
 m_blocks <- m_blocks |>
-  filter(tract == "49702")
+  filter(tract %in% c("49702", "51200"))
 
 #Temecula blocks cleaning
 t_blocks <- t_blocks_raw |>
@@ -77,18 +79,24 @@ t_blocks <- t_blocks_raw |>
 #removing decimals from fullcode/geoid and tract values
 t_blocks$fullcode <- gsub("\\.", "", t_blocks$fullcode)
 t_blocks$tract <- gsub("\\.", "", t_blocks$tract)
-#filtering to just block list for tracts 512 and 43254
-t_blocks <- t_blocks |>
-  filter(tract %in% c("512", "43254"))
 #adding two trailing zeros to the 512 tract values to match riverside_blocks tract values
 t_blocks$tract <- gsub("^512$", "51200", t_blocks$tract)
-
+#filtering to just block list for tracts 512 and 43254
+t_blocks <- t_blocks |>
+  filter(tract %in% c("51200", "43254"))
+  
 #Joining Temecula and Murrieta block lists into one set of incorporated blocks
 tm_blocks <- bind_rows(t_blocks, m_blocks)
 
 #Keeping Riverside blocks excluding those from tm_blocks 
+  #there are irrelevant blocks in 43254 from the riverside_blocks list, 
+  #found after uploading into ArcGIS. Remove blocks 1017, 1009, 1010, 1011,
+  #2004, 1012, 2015, 2005, 2006, 2010, 2007, 2008, 2014, 2013.
 unincorp_riverside_blocks <- riverside_blocks |>
-  anti_join(tm_blocks, join_by(geoid == fullcode))
+  anti_join(tm_blocks, join_by(geoid == fullcode)) |>
+  filter(!(tract == "43254" & block %in% c(1017, 1009, 1010, 1011, 2004,
+                                           1012, 2015, 2005, 2006, 2010, 
+                                           2007, 2008, 2014, 2013)))
 
 str(unincorp_riverside_blocks)
 
