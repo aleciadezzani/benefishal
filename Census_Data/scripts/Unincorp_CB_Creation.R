@@ -8,7 +8,7 @@
 #from San Diego and Riverside counties and then removing all non-relevant census tracts
 #In Riverside county the relevant tracts are 51200 (all except Temecula labeled blocks), 
 #49702 (all except Murrieta labeled blocks), and 43254 (all except Temecula labeled blocks).
-#In SD county, its all blocks within 19001. 
+#In SD county, its all blocks within 190.01. 
 #Reference maps used to define relevant blocks came from Census Bureau and are accessible in
 #Week 10 of Ellie Summer Notes within Benefishal Google Drive. 
 
@@ -91,6 +91,26 @@ unincorp_riverside_blocks <- riverside_blocks |>
   anti_join(tm_blocks, join_by(geoid == fullcode))
 
 str(unincorp_riverside_blocks)
+
+#Now for SD County filtering
+unincorp_sd_blocks <- sd_blocks_raw |>
+  clean_names() |>
+  filter(tract == "190.01")
+
+#I don't think I can join the two different shapefiles together unfortunately
+#But I think I can zip the outputs together and then upload them into Arc in one version...
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
