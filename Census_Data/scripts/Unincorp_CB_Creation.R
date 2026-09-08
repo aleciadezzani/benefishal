@@ -6,6 +6,11 @@
 #Goal of this script is to create a shapefile that includes the census blocks relevant to
 #our study area that are not within Fallbrook or Temecula. This will mean combining the shapefiles
 #from San Diego and Riverside counties and then removing all non-relevant census tracts
+#In Riverside county the relevant tracts are 51200 (all except Temecula labeled blocks), 
+#49702 (all except Murrieta labeled blocks), and 43254 (all except Temecula labeled blocks).
+#In SD county, its all blocks within 19001. 
+#Reference maps used to define relevant blocks came from Census Bureau and are accessible in
+#Week 10 of Ellie Summer Notes within Benefishal Google Drive. 
 
 #Clear the enviro
 rm(list=ls())
@@ -40,6 +45,7 @@ str(sd_blocks_raw)
 
 #Filtering the data
   ##start with Riverside, then do SD, then combine the shapefiles into one?
+
 #Riverside County
   ##reference maps from Census Bureau indicate that tracts 512, 497.02, and 432.54
   ##are only relevant tracts for us. filter for those first within the shapefile
@@ -52,6 +58,22 @@ str(riverside_blocks)
 riverside_blocks <- riverside_blocks |>
   filter(tract %in% c("51200", "49702", "43254"))
 
+#Murrieta blocks cleaning
+m_blocks <- m_blocks_raw |>
+  clean_names() |>
+  dplyr::select(fullcode, tract, block,place)
+#also have to pull the decimal point out of the geoid values, as riverside_blocks has no decimal
+m_blocks$fullcode <- gsub("\\.", "", m_blocks$fullcode)
+#do the same for tracts
+m_blocks$tract <- gsub("\\.", "", m_blocks$tract)
+
+#Temecula blocks cleaning
+t_blocks <- t_blocks_raw |>
+  clean_names() |>
+  dplyr::select(fullcode, tract, block, place)
+
+t_blocks$fullcode <- gsub("\\.", "", t_blocks$fullcode)
+t_blocks$tract <- gsub("\\.", "", t_blocks$tract)
 
 
 
