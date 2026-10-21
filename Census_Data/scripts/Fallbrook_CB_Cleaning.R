@@ -1,7 +1,7 @@
 # Fallbrook Census Block Data Cleaning
 # Author: E MacLean
 # Created: Sep 3, 2026
-# Modified: None
+# Modified: October 21, 2026
 ##############################
 #Clear the enviro
 rm(list=ls())
@@ -24,8 +24,9 @@ str(f_blocks_raw)
 #start with removing irrelevant data, cut down to only fullcode, tract, block, place
 f_blocks <- f_blocks_raw |>
   clean_names() |>
-  dplyr::select(fullcode, tract, block, place)
-  #last round I renamed fullcode to geoid, but we actually don't have to do that to get the join to work
+  dplyr::select(fullcode, tract, block, place)|>
+  rename(geoid_full=fullcode)
+  #renamed fullcode to geoid_full to match naming conventions for using tidycensus
 
 #Importing SD County census block data
 sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
@@ -36,6 +37,18 @@ str(f_blocks)
 #this SD county data doesn't have handy one to one geoid data like Riverside County, can I do a join
 #that keeps only the rows that meet both the tract and block values of my f_blocks dataset?
 #seems like yes...
+
+#making changes to code to make it usable w/ tidycensus
+#removing the period from tract, we need a string of numbers to use to make our geoid
+f_blocks$fullcode <- gsub("\\.", "", f_blocks$fullcode)
+
+#have to add in a leading zero to make it match the tidycensus geoid column, 
+#also need to rename to geoid_full
+
+
+
+#want to add in 
+
 
 #Filter joining the datasets
 
