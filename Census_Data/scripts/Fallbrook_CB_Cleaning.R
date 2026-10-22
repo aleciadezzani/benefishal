@@ -74,6 +74,10 @@ f_blocks <- f_blocks |>
   relocate(block, .after = name) |>
   relocate(block_group, .after = block)
 
+#saving just the f_blocks csv, no geometry
+
+write.csv(f_blocks, here("Census_Data/clean_data", 
+                         "f_blocks.csv"))
 
 #add in shapefile data only after making sure that I have population, and block group columns in f_blocks dataframe
 #Importing SD County census block data
