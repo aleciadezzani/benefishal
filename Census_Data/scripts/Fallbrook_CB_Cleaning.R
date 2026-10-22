@@ -52,7 +52,7 @@ block_pop <- get_decennial(
   geography = "block",
   variables = "P1_001N",
   state = "CA",
-  county = "Riverside",
+  county = "San Diego",
   year = 2020,
   sumfile = "pl")
 
@@ -63,8 +63,10 @@ block_pop <- block_pop |>
   dplyr::select(geoid, name, value) |>
   rename(geoid_full = geoid, population = value)
 
+#combining f_blocks w/ block_pop to get a blocklist w/ population in it
 
-
+f_blocks <- f_blocks |>
+  full_join(block_pop, join_by(geoid_full,))
 
 
 
@@ -78,12 +80,6 @@ str(f_blocks)
 #this SD county data doesn't have handy one to one geoid data like Riverside County, can I do a join
 #that keeps only the rows that meet both the tract and block values of my f_blocks dataset?
 #seems like yes...
-
-#making changes to code to make it usable w/ tidycensus
-#removing the period from tract, we need a string of numbers to use to make our geoid
-f_blocks$fullcode <- gsub("\\.", "", f_blocks$fullcode)
-
-
 #Filter joining the datasets
 
 fallbrook_blocks_geom <- sd_blocks_raw |>
