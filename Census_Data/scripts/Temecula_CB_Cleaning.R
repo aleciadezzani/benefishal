@@ -98,37 +98,13 @@ riverside_blocks <- riverside_blocks_raw |>
 
 str(riverside_blocks)
 
-#Checking keys before joining
-#pretty sure geoid is the primary key in both datasets, but want to make sure
-t_blocks |>
-  count(geoid) |>
-  filter(n >1)
-  #pulled zero rows where n>1, indicating it is a key
-t_blocks |>
-  filter(is.na(geoid))
-  #pulled zero rows with NA, indicating we don't have any rows missing a geoid
+###
+#Adding geometry to t_blocks dataframe
 
-riverside_blocks |>
-  count(geoid) |>
-  filter(n > 1)
-  #pulled zero rows where n>1, indicating that it's a key
-
-riverside_blocks |>
-  filter(is.na(geoid))
-  #pulled zero, think this indicates we're not missing anything
-
-#Now to use a filtering join (semi-join) to keep only the rows in riverside_blocks
-#that have a match in t_blocks
-#new data frame should be called temecula_blocks_geom, as it's all the blocks for Temecula
-#within the existing shapefile data!
-
-temecula_blocks_geom <- riverside_blocks |>
-  semi_join(t_blocks, join_by(geoid==geoid))
-  #this is giving me a data frame with no values, what's the issue?
-  #leading zeros! the riverside_blocks data has a leading zero in the geoid...
-  #need to go back in and use gsub again to cut that from the riverside_blocks dataset
+temecula_blocks_geom <- t_blocks |>
+  inner_join(riverside_blocks, join_by(geoid==geoid))
 
 #saving our new temecula only census blocks data as a shape file
 
-st_write(temecula_blocks_geom, here("Census_Data/raw_data/", 
+st_write(temecula_blocks_geom, here("Census_Data/Temecula_2020_Census_Blocks_Geom/", 
                                     "temecula_blocks_geom.shp"))
