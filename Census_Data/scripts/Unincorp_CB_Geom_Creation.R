@@ -1,7 +1,7 @@
 # Unincorporated Census Blocks Shape File Creation
 # Author: E MacLean
 # Created: September 9, 2026
-# Modified: N/A
+# Modified: October 21, 2026
 ##################
 #Goal of this script is to create a shapefile that includes the census blocks relevant to
 #our study area that are not within Fallbrook or Temecula. This will mean combining the shapefiles
@@ -20,6 +20,7 @@ library(here) #allows pointed file structure, essential for Mac to PC coding
 library(tidyverse) #essential for everything we're going to do
 library(janitor) #cleans things up, mainly names
 library(sf) #we need to deal with shapefile data
+library(tidycensus) #need to add pop data in
 
 #Load the data
 #add Murrieta block list
