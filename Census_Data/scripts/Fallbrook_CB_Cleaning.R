@@ -40,16 +40,31 @@ f_blocks <- f_blocks |>
   mutate(block_group = block %/% 1000) |>
   relocate(block_group, .before = block)
 
-#adding a tract w/ block group column
-f_blocks <- f_blocks |>
-  mutate(tract_bg = paste0(tract, block_group)) |>
-  relocate(tract_bg, .before = block) |>
-  #removing period from tract_bg
-  mutate(tract_bg = gsub("\\.", "", tract_bg))
-
 #need to add in population data to this now!
+#use tidycensus for that
+library(tidycensus)
+vars_decennial <- load_variables(2020, "pl")
+view(vars_decennial)
 
-##add in shapefile data only after making sure that I have population, and block group columns in f_blocks dataframe
+#pulling 2025 pop data by block for fallbrook...
+
+block_pop <- get_decennial(
+  geography = "block",
+  variables = "P1_001N",
+  state = "CA",
+  county = "Riverside",
+  year = 2020,
+  sumfile = "pl")
+
+str(block_pop)
+
+
+
+
+
+
+
+#add in shapefile data only after making sure that I have population, and block group columns in f_blocks dataframe
 #Importing SD County census block data
 sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
                                      "Census_Blocks_2020.shp"))
