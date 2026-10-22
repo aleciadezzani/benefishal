@@ -25,21 +25,22 @@ str(f_blocks_raw)
 f_blocks <- f_blocks_raw |>
   clean_names() |>
   dplyr::select(fullcode, tract, block)|>
-  rename(geoid_full=fullcode)
+  rename(geoid=fullcode)
   #renamed fullcode to geoid_full to match naming conventions for using tidycensus
 
 #removing the period from tract, we need a string of numbers to use to make our geoid
-f_blocks$geoid_full <- gsub("\\.", "", f_blocks$geoid_full)
+f_blocks$geoid <- gsub("\\.", "", f_blocks$geoid)
 
 #adding a leading zero to geoid_full so that it's usable w/ tidycensus
 f_blocks <- f_blocks |>
-  mutate(geoid_full = paste0("0", geoid_full))
+  mutate(geoid = paste0("0", geoid))
 
 #adding a block_group column
 f_blocks <- f_blocks |>
   mutate(block_group = block %/% 1000) |>
   relocate(block_group, .before = block)
 
+###
 #need to add in population data to this now!
 #use tidycensus for that
 library(tidycensus)
@@ -61,13 +62,17 @@ str(block_pop)
 block_pop <- block_pop |>
   clean_names() |>
   dplyr::select(geoid, name, value) |>
-  rename(geoid_full = geoid, population = value)
+  rename(population = value)
 
+###
 #combining f_blocks w/ block_pop to get a blocklist w/ population in it
+f_blocks <- f_blocks |>
+  inner_join(block_pop, join_by(geoid))
 
 f_blocks <- f_blocks |>
-  full_join(block_pop, join_by(geoid_full,))
-
+  relocate(name, .after = geoid) |>
+  relocate(block, .after = name) |>
+  relocate(block_group, .after = block)
 
 
 #add in shapefile data only after making sure that I have population, and block group columns in f_blocks dataframe
