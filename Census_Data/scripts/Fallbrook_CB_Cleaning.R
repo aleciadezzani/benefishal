@@ -87,10 +87,9 @@ str(f_blocks)
 #seems like yes...
 #Filter joining the datasets
 
-fallbrook_blocks_geom <- sd_blocks_raw |>
-  semi_join(f_blocks, join_by(tract, block))
-
-str(fallbrook_blocks_geom)
+fallbrook_blocks_geom <- f_blocks |>
+  inner_join(sd_blocks_raw, join_by(tract, block)) |>
+  dplyr::select(-objectid, -globalid)
 
 #saving our new fallbrook only census blocks data as a shape file
 
