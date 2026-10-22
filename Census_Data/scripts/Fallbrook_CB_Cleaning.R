@@ -31,7 +31,7 @@ f_blocks <- f_blocks_raw |>
 #removing the period from tract, we need a string of numbers to use to make our geoid
 f_blocks$geoid <- gsub("\\.", "", f_blocks$geoid)
 
-#adding a leading zero to geoid_full so that it's usable w/ tidycensus
+#adding a leading zero to geoid so that it's usable w/ tidycensus
 f_blocks <- f_blocks |>
   mutate(geoid = paste0("0", geoid))
 
@@ -93,7 +93,7 @@ fallbrook_blocks_geom <- f_blocks |>
 
 #saving our new fallbrook only census blocks data as a shape file
 
-st_write(fallbrook_blocks_geom, here("Census_Data/raw_data/", 
+st_write(fallbrook_blocks_geom, here("Census_Data/Fallbrook_2020_Census_Blocks_Geom/", 
                                     "fallbrook_blocks_geom.shp"))
 
 
