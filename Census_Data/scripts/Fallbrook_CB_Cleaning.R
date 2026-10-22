@@ -24,10 +24,32 @@ str(f_blocks_raw)
 #start with removing irrelevant data, cut down to only fullcode, tract, block, place
 f_blocks <- f_blocks_raw |>
   clean_names() |>
-  dplyr::select(fullcode, tract, block, place)|>
+  dplyr::select(fullcode, tract, block)|>
   rename(geoid_full=fullcode)
   #renamed fullcode to geoid_full to match naming conventions for using tidycensus
 
+#removing the period from tract, we need a string of numbers to use to make our geoid
+f_blocks$geoid_full <- gsub("\\.", "", f_blocks$geoid_full)
+
+#adding a leading zero to geoid_full so that it's usable w/ tidycensus
+f_blocks <- f_blocks |>
+  mutate(geoid_full = paste0("0", geoid_full))
+
+#adding a block_group column
+f_blocks <- f_blocks |>
+  mutate(block_group = block %/% 1000) |>
+  relocate(block_group, .before = block)
+
+#adding a tract w/ block group column
+f_blocks <- f_blocks |>
+  mutate(tract_bg = paste0(tract, block_group)) |>
+  relocate(tract_bg, .before = block) |>
+  #removing period from tract_bg
+  mutate(tract_bg = gsub("\\.", "", tract_bg))
+
+#need to add in population data to this now!
+
+##add in shapefile data only after making sure that I have population, and block group columns in f_blocks dataframe
 #Importing SD County census block data
 sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
                                      "Census_Blocks_2020.shp"))
@@ -41,13 +63,6 @@ str(f_blocks)
 #making changes to code to make it usable w/ tidycensus
 #removing the period from tract, we need a string of numbers to use to make our geoid
 f_blocks$fullcode <- gsub("\\.", "", f_blocks$fullcode)
-
-#have to add in a leading zero to make it match the tidycensus geoid column, 
-#also need to rename to geoid_full
-
-
-
-#want to add in 
 
 
 #Filter joining the datasets
