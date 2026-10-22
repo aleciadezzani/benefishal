@@ -58,6 +58,10 @@ block_pop <- get_decennial(
 
 str(block_pop)
 
+block_pop <- block_pop |>
+  clean_names() |>
+  dplyr::select(geoid, name, value) |>
+  rename(geoid_full = geoid, population = value)
 
 
 
