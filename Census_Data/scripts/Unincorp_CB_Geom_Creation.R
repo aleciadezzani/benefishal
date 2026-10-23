@@ -1,16 +1,16 @@
 # Unincorporated Census Blocks Shape File Creation
 # Author: E MacLean
 # Created: September 9, 2026
-# Modified: October 21, 2026
+# Modified: October 22, 2026
 ##################
 #Goal of this script is to create a shapefile that includes the census blocks relevant to
 #our study area that are not within Fallbrook or Temecula. This will mean combining the shapefiles
 #from San Diego and Riverside counties and then removing all non-relevant census tracts
-#In Riverside county the relevant tracts are 51200 (all except Temecula labeled blocks), 
-#49702 (all except Murrieta labeled blocks), and 43254 (all except Temecula labeled blocks).
-#In SD county, its all blocks within 190.01. 
-#Reference maps used to define relevant blocks came from Census Bureau and are accessible in
-#Week 10 of Ellie Summer Notes within Benefishal Google Drive. 
+#San Diego County tract map: https://www2.census.gov/geo/maps/DC2020/PL20/st06_ca/censustract_maps/c06073_san_diego/DC20CT_C06073.pdf
+#Riverside County tract map: https://www2.census.gov/geo/maps/DC2020/PL20/st06_ca/censustract_maps/c06065_riverside/DC20CT_C06065.pdf
+#10/22/26 note
+  #in Riverside County want tracts 464.01, 432.72, 497.72, 512 (parts not already in Temec), and 432.54 (parts not already in Temec)
+  #in SD County want tract 190.01
 
 #Clear the enviro
 rm(list=ls())
@@ -22,39 +22,104 @@ library(janitor) #cleans things up, mainly names
 library(sf) #we need to deal with shapefile data
 library(tidycensus) #need to add pop data in
 
-#Load the data
-#add Murrieta block list
-m_blocks_raw <- read.table(here("Census_Data/raw_data", "murrieta_blocklist_raw.txt"), 
-                           header = TRUE, sep = ";")
-m_blocks_raw
+#load the data
+#adding Fallbrook block list
+f_blocks<- read_csv(here("Census_Data/clean_data", "f_blocks.csv"), 
+                    col_types = cols(geoid = col_character()))
+                    #have to add this otherwise R reads the geoid column as numbers, dropping leading zeros and adding a decimal point
+str(f_blocks)
 
-#add Temecula block list
-t_blocks_raw <- read.table(here("Census_Data/raw_data", "t_blocks_raw.txt"), 
-                           header = TRUE, sep = ";")
-t_blocks_raw
+#adding all sd county block list
+sd_blocks_raw <- read.table(here("Census_Data/raw_data", "sd_county_block_list.txt"), 
+                            header = TRUE, sep = ";")
 
+###
+
+#clean the data
+#there's an extra column in import f_blocks drop it
+f_blocks <- f_blocks |>
+  dplyr::select(geoid, name, block, block_group, tract, population)
+
+#Cut down sd_blocks to only fullcode, tract, block, place, rename fullcode to geoid
+sd_blocks <- sd_blocks_raw |>
+  clean_names() |>
+  dplyr::select(fullcode, tract, block)|>
+  rename(geoid=fullcode)
+
+#removing the period from tract, we need a string of numbers to use to make our geoid
+sd_blocks$geoid <- gsub("\\.", "", sd_blocks$geoid)
+
+#adding a leading zero to geoid so that it's usable w/ tidycensus
+sd_blocks <- sd_blocks |>
+  mutate(geoid = paste0("0", geoid))
+
+#adding a block_group column
+sd_blocks <- sd_blocks |>
+  mutate(block_group = block %/% 1000) |>
+  relocate(block_group, .before = block)
+
+#filtering for just our relevant tract, 190.01
+sd_blocks <- sd_blocks |>
+  filter(tract == "190.01")
+
+###
+#adding census population data to those blocks
+
+#make dataframe w/population for sd county blocks
+block_pop <- get_decennial(
+  geography = "block",
+  variables = "P1_001N",
+  state = "CA",
+  county = "San Diego",
+  year = 2020,
+  sumfile = "pl")
+#dropping irrelevant columns, renaming population column
+block_pop <- block_pop |>
+  clean_names() |>
+  dplyr::select(geoid, name, value) |>
+  rename(population = value)
+
+#combining sd_blocks w/ block_pop to get sd_blocks w/ population column
+sd_blocks <- sd_blocks |>
+  inner_join(block_pop, join_by(geoid))
+
+sd_blocks <- sd_blocks |>
+  relocate(name, .after = geoid) |>
+  relocate(block, .after = name) |>
+  relocate(block_group, .after = block)
+
+#removing fallbrook blocks from sd_blocks, to get  blocks in 190.01 not in fallbrook
+sd_blocks <- sd_blocks |>
+  anti_join(f_blocks, join_by(geoid))
+
+###
+#saving just the sd_blocks csv, no geometry
+write.csv(sd_blocks, here("Census_Data/clean_data", 
+                         "sd_blocks.csv"), row.names = FALSE)
+
+###
+#adding geometry to sd_blocks
+
+#add San Diego County census block shapefile
+sd_geom_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
+                              "Census_Blocks_2020.shp"))
+str(sd_geom_raw)
+
+#combining the two
+sd_blocks_geom <- sd_blocks |>
+  inner_join(sd_geom_raw, join_by(tract, block)) |>
+  dplyr::select(-objectid, -globalid)
+
+
+
+
+#Riverside County
 #add Riverside County census block shapefile
 riverside_blocks_raw <- st_read(here("Census_data/raw_data/Riverside_Census_Blocks_2020_", 
                                      "Census_Blocks_2020_.shp"))
 riverside_blocks_raw
 str(riverside_blocks_raw)
 
-#add San Diego County census block shapefile
-sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
-                              "Census_Blocks_2020.shp"))
-str(sd_blocks_raw)
-
-#adding Fallbrook block list
-f_blocks_raw <- read.table(here("Census_Data/raw_data", "f_blocks_list_raw.txt"), 
-                           header = TRUE, sep = ";")
-str(f_blocks_raw)
-
-#Filtering the data
-  ##start with Riverside, then do SD, then combine the shapefiles into one?
-
-#Riverside County
-  ##reference maps from Census Bureau indicate that tracts 512, 497.02, and 432.54
-  ##are only relevant tracts for us. filter for those first within the shapefile
 riverside_blocks <- riverside_blocks_raw |>
   clean_names()
 #removing the leading zero from the geoid so that join works aka geoids match between datasets
@@ -77,6 +142,11 @@ m_blocks$tract <- gsub("^512$", "51200", m_blocks$tract)
 #pulling block list for tracts 49702 and 512
 m_blocks <- m_blocks |>
   filter(tract %in% c("49702", "51200"))
+
+#add Temecula block list
+t_blocks_raw <- read.table(here("Census_Data/raw_data", "t_blocks_raw.txt"), 
+                           header = TRUE, sep = ";")
+t_blocks_raw
 
 #Temecula blocks cleaning
 t_blocks <- t_blocks_raw |>
@@ -107,6 +177,12 @@ unincorp_riverside_blocks <- riverside_blocks |>
 str(unincorp_riverside_blocks)
 
 #Now for SD County 
+
+#add San Diego County census block shapefile
+sd_blocks_raw <- st_read(here("Census_data/raw_data/SD_Census_Blocks_2020_shapefile", 
+                              "Census_Blocks_2020.shp"))
+str(sd_blocks_raw)
+
 #Cleaning Fallbrook list for just blocks in the 190.01 tract
 f_blocks <- f_blocks_raw |>
   clean_names() |>
@@ -117,6 +193,7 @@ f_blocks <- f_blocks_raw |>
 sd_blocks <- sd_blocks_raw |>
   clean_names() |>
   filter(tract == "190.01")
+
 
 #joining the datasets together to get only the census blocks in 190.01 that are not
 #within the CDP of Fallbrook
