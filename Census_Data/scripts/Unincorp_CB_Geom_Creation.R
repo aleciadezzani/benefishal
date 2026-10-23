@@ -212,6 +212,18 @@ riverside_blocks_geom <- riverside_blocks |>
   inner_join(riverside_geom, join_by(geoid))
 
 ###
+#cutting irrelevant blocks from tract 432.54, correction after uploading to Arc
+#need to remove: 1017, 1009, 1010, 1011, 1012, 2004, 2015, 2005, 2006, 2010,
+#               2008, 2007, 2014, 2013
+riverside_blocks_geom <- riverside_blocks_geom |>
+  filter(!(geoid %in% c("060650432541017", "060650432541009", "060650432541010", 
+                        "060650432541011", "060650432541012", "060650432542004",
+                        "060650432542015", "060650432542005", "060650432542006",
+                        "060650432542010", "060650432542008", "060650432542007",
+                        "060650432542014", "060650432542013")))
+
+
+###
 #save new unincorporated riverside county blocks as a shape file 
 
 st_write(riverside_blocks_geom, here("Census_Data/Unincorporated_Riverside_SD_2020_Census_Blocks", 
