@@ -84,6 +84,11 @@ t_blocks <- t_blocks |>
   relocate(block, .after = name) |>
   relocate(block_group, .after = block)
 
+###
+#saving t_blocks w/ pop data
+write.csv(t_blocks, here("Census_Data/clean_data", 
+                          "t_blocks.csv"), row.names = FALSE)
+
 
 #confirming that geoid, tract, block, and place are formats of variables
 #that match in riverside_blocks
